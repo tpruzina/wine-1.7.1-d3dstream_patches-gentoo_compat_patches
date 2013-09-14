@@ -2169,6 +2169,16 @@ void device_invalidate_shader_constants(const struct wined3d_device *device, DWO
     }
 }
 
+void device_invalidate_shader_constants(const struct wined3d_device *device, DWORD mask)
+{
+    UINT i;
+
+    for (i = 0; i < device->context_count; ++i)
+    {
+        device->contexts[i]->constant_update_mask |= mask;
+    }
+}
+
 HRESULT CDECL wined3d_device_set_vs_consts_b(struct wined3d_device *device,
         UINT start_register, const BOOL *constants, UINT bool_count)
 {

@@ -6,7 +6,7 @@ mkdir wine64
 mkdir wine32
 
 cd wine64
-../configure --enable-win64 "$@"
+../configure --enable-win64 --libdir=/usr/lib64 "$@"
 make
 
 cd ../wine32
