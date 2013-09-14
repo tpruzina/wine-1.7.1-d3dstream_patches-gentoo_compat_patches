@@ -1,0 +1,41 @@
+From db79c6bd89345a8e8016b56c3f04995a3d0bb410 Mon Sep 17 00:00:00 2001
+From: Nikolay Sivov <nsivov@codeweavers.com>
+Date: Wed, 21 Aug 2013 16:11:05 +0400
+Subject: [PATCH] msxml3: Fix a warning accessing internal buffer of xmlOutputBuffer.
+
+---
+ dlls/msxml3/node.c |   11 ++++++++++-
+ 1 files changed, 10 insertions(+), 1 deletions(-)
+
+diff --git a/dlls/msxml3/node.c b/dlls/msxml3/node.c
+index a196f4e..4c03571 100644
+--- a/dlls/msxml3/node.c
++++ b/dlls/msxml3/node.c
+@@ -987,6 +987,15 @@ static void htmldoc_dumpcontent(xmlOutputBufferPtr buf, xmlDocPtr doc)
+     doc->type = type;
+ }
+ 
++static const xmlChar *get_output_buffer_content(xmlOutputBufferPtr output)
++{
++#ifdef LIBXML2_NEW_BUFFER
++    return xmlOutputBufferGetContent(output);
++#else
++    return xmlBufferContent(output->buffer);
++#endif
++}
++
+ HRESULT node_transform_node(const xmlnode *This, IXMLDOMNode *stylesheet, BSTR *p)
+ {
+ #ifdef SONAME_LIBXSLT
+@@ -1015,7 +1024,7 @@ HRESULT node_transform_node(const xmlnode *This, IXMLDOMNode *stylesheet, BSTR *
+                 if (output)
+                 {
+                     htmldoc_dumpcontent(output, result->doc);
+-                    content = xmlBufferContent(output->buffer);
++                    content = get_output_buffer_content(output);
+                     *p = bstr_from_xmlChar(content);
+                     xmlOutputBufferClose(output);
+                 }
+-- 
+1.7.2.5
+
